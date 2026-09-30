@@ -1,0 +1,67 @@
+{
+  "model": "TemporalEventGNN",
+  "label_field": "ground_truth",
+  "classes": [
+    "benign",
+    "false_positive",
+    "intrusion"
+  ],
+  "test_accuracy": 0.9758713136729222,
+  "test_macro_f1": 0.9782075343807377,
+  "confusion_matrix": [
+    [
+      88,
+      0,
+      0
+    ],
+    [
+      1,
+      139,
+      1
+    ],
+    [
+      0,
+      7,
+      137
+    ]
+  ],
+  "classification_report": {
+    "0": {
+      "precision": 0.9887640449438202,
+      "recall": 1.0,
+      "f1-score": 0.9943502824858758,
+      "support": 88.0
+    },
+    "1": {
+      "precision": 0.952054794520548,
+      "recall": 0.9858156028368794,
+      "f1-score": 0.9686411149825784,
+      "support": 141.0
+    },
+    "2": {
+      "precision": 0.9927536231884058,
+      "recall": 0.9513888888888888,
+      "f1-score": 0.9716312056737588,
+      "support": 144.0
+    },
+    "accuracy": 0.9758713136729222,
+    "macro avg": {
+      "precision": 0.9778574875509246,
+      "recall": 0.9790681639085893,
+      "f1-score": 0.9782075343807377,
+      "support": 373.0
+    },
+    "weighted avg": {
+      "precision": 0.9764275702991526,
+      "recall": 0.9758713136729222,
+      "f1-score": 0.9758608999686914,
+      "support": 373.0
+    }
+  },
+  "roc_auc": {
+    "benign": 0.9984449760765551,
+    "false_positive": 0.9900036683785767,
+    "intrusion": 0.9899927219796215
+  },
+  "num_test_graphs": 373
+}
