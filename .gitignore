@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+archive/
+GNN_Files.zip
+FINAL_Poster_Nelms*
+Research Updates 04*
+temporal_alarm_tgnn_loss_curve_zoom.png
+TGNN_DL.pdf
+UUI_synthetic_data_generator.zip
+UUI_SyntheticAlarmDataScript_Notes.docx
+temporal_alarm_tgnn_train_1000.log
+temporal_alarm_pipeline/__pycache__/
