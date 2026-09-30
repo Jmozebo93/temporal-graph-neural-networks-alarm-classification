@@ -1,0 +1,175 @@
+site:
+  # Notional Site Layout
+  perimeter:
+    width: 300.0
+    height: 200.0
+
+    # exactly 9 sectors total: 2 per side + 1 access sector
+    sectors:
+      - {id: "N-0", side: "N", frac: 0.25}
+      - {id: "N-1", side: "N", frac: 0.75}
+      - {id: "E-0", side: "E", frac: 0.25}
+      - {id: "E-1", side: "E", frac: 0.75}
+      - {id: "S-0", side: "S", frac: 0.25}
+      - {id: "S-1", side: "S", frac: 0.75}
+      - {id: "W-0", side: "W", frac: 0.25}
+      - {id: "W-1", side: "W", frac: 0.75}
+      - {id: "S-AC", side: "S", frac: 0.55, access_control: true}
+
+    # perimeter sensors: exactly two sensors per sector
+    sensors_per_sector:
+      - {type: "FENCE_DISTURB", p_detect: 0.85}
+      - {type: "RADAR", p_detect: 0.75}
+
+  building:
+    width: 120.0
+    height: 70.0
+
+    # Layout constraints captured as explicit zones and connectivity
+    zones:
+      - {id: "ROOM_S_ENTRY", layer: "INTERIOR"}
+      - {id: "ROOM_W_ENTRY", layer: "INTERIOR"}
+      - {id: "HALL_MAIN", layer: "INTERIOR"}
+      - {id: "ROOM_ADMIN", layer: "INTERIOR"}
+      - {id: "ROOM_SECURITY", layer: "INTERIOR"}
+      - {id: "ASSET_ROOM", layer: "ASSET"}  # represents full east side
+
+    interior_sensors:
+      # Pd values notional values recommended by "The Design and Evaluation of Physical Protection Systems", Mary Lynn Garcia, Sandia National Laboratories.
+      # keep interior nuisance low by default
+      - {zone: "ROOM_S_ENTRY", type: "PIR", p_detect: 0.90}
+      - {zone: "ROOM_W_ENTRY", type: "PIR", p_detect: 0.90}
+      - {zone: "HALL_MAIN", type: "PIR", p_detect: 0.90}
+      - {zone: "ROOM_ADMIN", type: "PIR", p_detect: 0.90}
+      - {zone: "ROOM_SECURITY", type: "PIR", p_detect: 0.90}
+      - {zone: "ASSET_ROOM", type: "PIR", p_detect: 0.90}
+      - {zone: "ASSET_ROOM", type: "BMS", p_detect: 0.90, sensor_id: "BMS_ASSET_DOOR"}
+
+    skin_points:
+      # doors/windows only south and west; walls on all sides.
+      - {zone: "SKIN_S_DOOR", kind: "DOOR"}
+      - {zone: "SKIN_W_DOOR", kind: "DOOR"}
+      - {zone: "SKIN_S_WIN1", kind: "WIN"}
+      - {zone: "SKIN_W_WIN1", kind: "WIN"}
+      - {zone: "SKIN_N_WALL", kind: "WALL"}
+      - {zone: "SKIN_S_WALL", kind: "WALL"}
+      - {zone: "SKIN_E_WALL", kind: "WALL"}
+      - {zone: "SKIN_W_WALL", kind: "WALL"}
+
+    skin_sensors:
+      # Pd values notional values recommended by "The Design and Evaluation of Physical Protection Systems", Mary Lynn Garcia, Sandia National Laboratories.
+      DOOR:
+        - {type: "BMS", p_detect: 0.90}
+      WIN:
+        - {type: "GLASSBREAK", p_detect: 0.90}
+        - {type: "BMS", p_detect: 0.90}
+      WALL:
+        # wall breach logs ONLY via breakwire
+        - {type: "BREAKWIRE", p_detect: 0.90}
+
+protected_area:
+  # Pd values notional values recommended by "The Design and Evaluation of Physical Protection Systems", Mary Lynn Garcia, Sandia National Laboratories.
+  quadrant_radars:
+    - {id: "PA_RADAR_N", quadrant: "N", type: "RADAR", p_detect: 0.90}
+    - {id: "PA_RADAR_S", quadrant: "S", type: "RADAR", p_detect: 0.90}
+    - {id: "PA_RADAR_E", quadrant: "E", type: "RADAR", p_detect: 0.90}
+    - {id: "PA_RADAR_W", quadrant: "W", type: "RADAR", p_detect: 0.90}
+
+false_alarms:
+  # Target average nuisance events per 24h by category.
+  # The generator will allocate these across sensors in that category.
+  targets_per_day:
+    perimeter: 7.0
+    protected_area: 2.0
+    skin: 1.0
+    interior: 2.0
+    asset: 0.3
+
+  # small per-sensor randomization multiplier applied at build-time
+  per_sensor_jitter: [0.8, 1.2]
+
+delays:
+  # From "Vulnerability Assessment of Physical Protection Systems" - Mary Lynn Garcia, Sandia National Laboratories.
+  fence_breach_s: {mean: 30, sigma: 12}
+  pa_transit_s: {mean: 180, sigma: 45}
+  skin_breach_s:
+    DOOR: {mean: 90, sigma: 0.61}
+    WIN:  {mean: 150, sigma: 45}
+    WALL: {mean: 120, sigma: 42}
+  interior_transit_s: {mean: 25, sigma: 8}
+  asset_door_breach_s: {mean: 180, sigma: 75}
+
+connectivity:
+  # Explicit edges between zones; edge_type drives which delay distribution applies
+  edges:
+    # Turnstile path (benign)
+    - {src: "TURNSTILE_S-AC", dst: "PA_RADAR_S", edge_type: "ACCESS_TRANSIT"}
+
+    # Skin to interior mapping (doors enter side rooms)
+    - {src: "SKIN_S_DOOR", dst: "ROOM_S_ENTRY", edge_type: "SKIN_DOOR"}
+    - {src: "SKIN_W_DOOR", dst: "ROOM_W_ENTRY", edge_type: "SKIN_DOOR"}
+    - {src: "SKIN_S_WIN1", dst: "ROOM_S_ENTRY", edge_type: "SKIN_WIN"}
+    - {src: "SKIN_W_WIN1", dst: "ROOM_W_ENTRY", edge_type: "SKIN_WIN"}
+
+    # Wall breaches land in zones (simplified)
+    - {src: "SKIN_S_WALL", dst: "ROOM_S_ENTRY", edge_type: "SKIN_WALL"}
+    - {src: "SKIN_W_WALL", dst: "ROOM_W_ENTRY", edge_type: "SKIN_WALL"}
+    - {src: "SKIN_N_WALL", dst: "HALL_MAIN", edge_type: "SKIN_WALL"}
+    - {src: "SKIN_E_WALL", dst: "ASSET_ROOM", edge_type: "SKIN_WALL"}
+
+    # interior
+    - {src: "ROOM_S_ENTRY", dst: "HALL_MAIN", edge_type: "INT_TRANSIT"}
+    - {src: "ROOM_W_ENTRY", dst: "HALL_MAIN", edge_type: "INT_TRANSIT"}
+    - {src: "HALL_MAIN", dst: "ROOM_ADMIN", edge_type: "INT_TRANSIT"}
+    - {src: "HALL_MAIN", dst: "ROOM_SECURITY", edge_type: "INT_TRANSIT"}
+    - {src: "ROOM_ADMIN", dst: "HALL_MAIN", edge_type: "INT_TRANSIT"}
+    - {src: "ROOM_SECURITY", dst: "HALL_MAIN", edge_type: "INT_TRANSIT"}
+    - {src: "HALL_MAIN", dst: "ASSET_ROOM", edge_type: "ASSET_DOOR"}
+    - {src: "ASSET_ROOM", dst: "HALL_MAIN", edge_type: "INT_TRANSIT"}
+
+behavior:
+  # Notional
+  assessments:
+    nuisance:
+      weights: {invalid: 0.90, valid: 0.1, intrusion: 0}
+    benign_misassessment:
+      p_error: 0.02
+      when_error_weights: {invalid: 0.85, valid: 0.15}
+    intrusion_operator:
+      p_correct: 0.80
+      when_wrong_weights: {valid: 0.50, invalid: 0.50}
+
+  benign_schedule:
+    # Notional
+    shift_in:
+      time: "07:30"
+      sigma_minutes: 18
+      count: 45
+      p_go_asset: 0.15
+    shift_out:
+      time: "16:30"
+      sigma_minutes: 22
+      count: 45
+      p_go_asset: 0.05
+    meal_exit:
+      time: "11:30"
+      sigma_minutes: 10
+      count: 18
+      p_go_asset: 0.02
+    meal_return:
+      time: "12:30"
+      sigma_minutes: 12
+      count: 18
+      p_go_asset: 0.02
+    stragglers:
+      business_hours: {start: "08:00", end: "17:00"}
+      sigma_minutes: 20
+      count: 8
+      p_go_asset: 0.25
+
+attacks:
+  p_bypass_perimeter: 0.20
+  operator_error_p: 0.20
+  max_steps: 25
+  count_scenario: 10
+  count_validation: 6
