@@ -773,6 +773,14 @@ This version now has:
 
 That does not mean the model is fully productionized yet, but it does mean the project now has a credible foundation for the next stage of engineering and stakeholder review.
 
+## Contact
+
+For questions about this project, please contact:
+- North Carolina A&T State University
+- Department of Computer Science
+- Jordan Mozebo, PhD student: jtmozebo@aggies.ncat.edu
+- Aryaunna Armstrong, Master's student: atarmstrong1@aggies.ncat.edu
+
 ## Acknowledgements
 This work was supported by the Laboratory Directed Research and Development program (Project 240551) at Sandia
 National Laboratories, a multimission laboratory managed and operated by National Technology and Engineering
